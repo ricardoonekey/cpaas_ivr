@@ -5,8 +5,10 @@ import org.springframework.boot.runApplication
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.support.ResourceBundleMessageSource
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 
 
+@EnableRedisRepositories
 @SpringBootApplication
 class Application {
 
