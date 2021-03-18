@@ -79,9 +79,9 @@ class BalanceInboundXmlEndpoint(private val messageSource: MessageSource,
      */
     @PostMapping("/gather/nip")
     fun gatherNipAndStateBalance(@RequestParam request: Map<String, String>): Response {
-        val localeLang = LocaleContextHolder.getLocale().language
-        val localeParam = mapOf("locale" to localeLang)
-        val sayLang = Language.fromValue(localeLang)
+        val locale = LocaleContextHolder.getLocale()
+        val localeParam = mapOf("locale" to locale.language)
+        val sayLang = Language.fromValue(locale.language)
 
         if(callSessionManager.verifyNip(request["CallSid"] ?: "", request["Digits"] ?: "")) {
             val account = callSessionManager.getSessionAccount(request["CallSid"] ?: "")
@@ -89,21 +89,21 @@ class BalanceInboundXmlEndpoint(private val messageSource: MessageSource,
                 val balance = account.balance.toString().split(".")
 
                 String.format(
-                    messageSource.getMessage("account.balance.statement", null, LocaleContextHolder.getLocale()),
+                    messageSource.getMessage("account.balance.statement", null, locale),
                     balance[0], balance[1]
                 )
             } else {
-                messageSource.getMessage("error.general", null, LocaleContextHolder.getLocale())
+                messageSource.getMessage("error.general", null, locale)
             }
 
             return ZangInboundXml.builder()
-                .say(Say.builder().setText(prompt).setLanguage(sayLang ?: Language.EN).build()
+                .say(Say.builder().setText(prompt).setLanguage(sayLang).build()
                 ).build()
         }
         else {
             val link = linkTo(methodOn(BalanceInboundXmlEndpoint::class.java)
                 .gatherNipAndStateBalance(localeParam)).toString()
-            val prompt = messageSource.getMessage("error.nip.incorrect", null, LocaleContextHolder.getLocale())
+            val prompt = messageSource.getMessage("error.nip.incorrect", null, locale)
 
             return ZangInboundXml.builder()
                 .gather(Gather.builder().setMethod(HttpMethod.POST).setNumDigits(4).setAction(link)
